@@ -33,8 +33,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
@@ -316,24 +314,7 @@ public class DocumentController {
 
             // ✅ 5. PDF 생성
             byte[] pdfData = pdfService.generateSignedDocument(id, signatures);
-
-            String fileName= "Unknown";
-            if(document.getType() == 1 ) {
-                // 1. 변수를 조건문 밖에서 미리 선언 (초기값 설정)
-                String subjectName = "Unknown";
-                Pattern pattern = Pattern.compile("^_*([^_]+)");
-                Matcher matcher = pattern.matcher(document.getRequestName());
-                // 2. 조건문 안에서 값을 할당
-                if (matcher.find()) {
-                    subjectName = matcher.group(1);
-                }
-                fileName = String.format("%s(%s)_%s.pdf",
-                        document.getMember().getName(),
-                        document.getMember().getUniqueId(),
-                        subjectName);
-            } else {
-                fileName = document.getFileName();
-            }
+            String fileName = document.getFileName();
 
             String encodedFileName = URLEncoder.encode(fileName, "UTF-8")
                     .replaceAll("\\+", "%20");
