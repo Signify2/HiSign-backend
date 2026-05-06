@@ -1,17 +1,15 @@
 package com.example.backend.auth.filter;
 
-import com.example.backend.auth.config.CookieProperties;
-import com.example.backend.auth.dto.AuthDto;
-import com.example.backend.auth.exception.DoNotLoginException;
-import com.example.backend.auth.exception.WrongTokenException;
-import com.example.backend.auth.service.AuthService;
-import com.example.backend.auth.util.CookieUtil;
-import com.example.backend.auth.util.JwtUtil;
-import com.example.backend.member.entity.Member;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.context.annotation.Bean;
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.regex.Pattern;
+
+import javax.servlet.FilterChain;
+import javax.servlet.ServletException;
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -21,15 +19,18 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.web.filter.OncePerRequestFilter;
 
-import javax.servlet.FilterChain;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.Cookie;
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.regex.Pattern;
+import com.example.backend.auth.config.CookieProperties;
+import com.example.backend.auth.dto.AuthDto;
+import com.example.backend.auth.exception.DoNotLoginException;
+import com.example.backend.auth.exception.WrongTokenException;
+import com.example.backend.auth.service.AuthService;
+import com.example.backend.auth.util.CookieUtil;
+import com.example.backend.auth.util.JwtUtil;
+import com.example.backend.member.entity.Member;
+
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -59,13 +60,16 @@ public class JwtTokenFilter extends OncePerRequestFilter {
             // 와랩 배포용 대응
             "/hisign_1/api/auth/.*",
             "/hisign_1/api/signature-requests/check",
-            "/hisign_1/api/auth/signer/.*"
+            "/hisign_1/api/auth/signer/.*",
+            "/test/.*"
 //            "/hisign_1/swagger-ui/.*",
 //            "/hisign_1/v3/api-docs",
 //            "/hisign_1/v3/api-docs/.*",
 //            "/hisign_1/swagger-resources/.*",
 //            "/hisign_1/webjars/.*",
 //            "/hisign_1/swagger-ui.html"
+
+
     };
     return Pattern.compile("^(" + String.join("|", excludedPaths) + ")$");
   }

@@ -1,11 +1,8 @@
 package com.example.backend.auth.config;
 
-import com.example.backend.auth.filter.ExceptionHandlerFilter;
-import com.example.backend.auth.filter.JwtTokenFilter;
-import com.example.backend.auth.filter.SignerTokenFilter;
-import com.example.backend.auth.service.AuthService;
-import com.example.backend.auth.util.CookieUtil;
-import lombok.RequiredArgsConstructor;
+import java.util.Arrays;
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -20,8 +17,13 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
-import java.util.Arrays;
-import java.util.List;
+import com.example.backend.auth.filter.ExceptionHandlerFilter;
+import com.example.backend.auth.filter.JwtTokenFilter;
+import com.example.backend.auth.filter.SignerTokenFilter;
+import com.example.backend.auth.service.AuthService;
+import com.example.backend.auth.util.CookieUtil;
+
+import lombok.RequiredArgsConstructor;
 
 @Configuration
 @EnableWebSecurity
@@ -68,7 +70,9 @@ public class SecurityConfig {
                     "/v3/api-docs/**",
                     "/swagger-resources/**",
                     "/webjars/**",
-                    "/swagger-ui.html"
+                    "/swagger-ui.html",
+                    "/test/**"
+
             ).permitAll()
             .antMatchers("/api/files/**", "/api/documents/**", "/api/signature-requests/send-mail").authenticated();
     return http.build();

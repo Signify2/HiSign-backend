@@ -1,29 +1,5 @@
 package com.example.backend.document.controller;
 
-import com.example.backend.auth.dto.AuthDto;
-import com.example.backend.document.dto.UploadRequestDTO;
-import com.example.backend.document.entity.Document;
-import com.example.backend.document.service.DocumentService;
-import com.example.backend.file.service.FileService;
-import com.example.backend.mail.service.MailService;
-import com.example.backend.member.entity.Member;
-import com.example.backend.member.service.MemberService;
-import com.example.backend.signature.DTO.SignatureDTO;
-import com.example.backend.signature.entity.Signature;
-import com.example.backend.signature.service.SignatureService;
-import com.example.backend.signatureRequest.service.SignatureRequestService;
-import com.example.backend.pdf.service.PdfService;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.core.io.Resource;
-import org.springframework.http.*;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.server.ResponseStatusException;
-
 import java.io.ByteArrayOutputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
@@ -38,6 +14,44 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
+
+import org.springframework.core.io.Resource;
+import org.springframework.http.ContentDisposition;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestPart;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.server.ResponseStatusException;
+
+import com.example.backend.auth.dto.AuthDto;
+import com.example.backend.document.dto.UploadRequestDTO;
+import com.example.backend.document.entity.Document;
+import com.example.backend.document.service.DocumentService;
+import com.example.backend.file.service.FileService;
+import com.example.backend.mail.service.MailService;
+import com.example.backend.member.entity.Member;
+import com.example.backend.member.service.MemberService;
+import com.example.backend.pdf.service.PdfService;
+import com.example.backend.signature.entity.Signature;
+import com.example.backend.signature.service.SignatureService;
+import com.example.backend.signatureRequest.service.SignatureRequestService;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 
 @Slf4j
@@ -262,7 +276,9 @@ public class DocumentController {
     }
 
     @GetMapping("/admin_document")
-    public ResponseEntity<List<Map<String, Object>>> getAdminDocuments(@RequestParam(value = "searchQuery", required = false) String searchQuery) {
+    public ResponseEntity<List<Map<String, Object>>> getAdminDocuments(
+            @RequestParam(value = "year", required = false) String year,
+            @RequestParam(value = "month", required = false) String month) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
         if (authentication == null || !(authentication.getPrincipal() instanceof AuthDto)) {
@@ -274,12 +290,41 @@ public class DocumentController {
 
         List<Map<String, Object>> documents = documentService.getAllAdminDocuments(uniqueId);
 
-        if (searchQuery != null && !searchQuery.isEmpty()) {
+        String trimmedYear = year != null ? year.trim() : null;
+        String normalizedMonth = normalizeMonthToken(month);
+
+        if ((trimmedYear != null && !trimmedYear.isEmpty())
+                || (normalizedMonth != null && !normalizedMonth.isEmpty())) {
             documents = documents.stream()
-                    .filter(doc -> doc.get("requestName").toString().toLowerCase().contains(searchQuery.toLowerCase()))
+                    .filter(doc -> {
+                        Object requestNameRaw = doc.get("requestName");
+                        if (requestNameRaw == null) {
+                            return false;
+                        }
+
+                        String[] tokens = requestNameRaw.toString().split("_");
+                        if (tokens.length < 3) {
+                            return false;
+                        }
+
+                        String requestYear = tokens[1].trim();
+                        String requestMonth = normalizeMonthToken(tokens[2]);
+
+                        boolean yearMatches = trimmedYear == null || trimmedYear.isEmpty() || requestYear.equals(trimmedYear);
+                        boolean monthMatches = normalizedMonth == null || normalizedMonth.isEmpty() || requestMonth.equals(normalizedMonth);
+                        return yearMatches && monthMatches;
+                    })
                     .collect(Collectors.toList());
         }
         return ResponseEntity.ok(documents);
+    }
+
+    private String normalizeMonthToken(String monthToken) {
+        if (monthToken == null) {
+            return null;
+        }
+        String normalized = monthToken.trim().replace("월", "");
+        return normalized.replaceAll("\\s+", "");
     }
 
     @GetMapping("/request-check/{id}")
