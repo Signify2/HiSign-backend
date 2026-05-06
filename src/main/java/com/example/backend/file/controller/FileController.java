@@ -46,20 +46,25 @@ public class FileController {
 
     // 과목 목록 조회
     @GetMapping("/subjects")
-    public ResponseEntity<List<String>> getSubjectList() throws IOException {
-        List<String> subjectList = fileService.readSubjectList();
+    public ResponseEntity<List<String>> getSubjectList(
+            @RequestParam(defaultValue = "worklog") String docType) throws IOException {
+        List<String> subjectList = fileService.readSubjectList(docType);
         return ResponseEntity.ok(subjectList);
     }
 
+
     // 과목 목록 저장
     @PostMapping("/subjects")
-    public ResponseEntity<String> saveSubjectList(@RequestBody String content) {
+    public ResponseEntity<String> saveSubjectList(
+            @RequestParam(defaultValue = "worklog") String docType,
+            @RequestBody String content) {
         try {
-            fileService.saveSubjectList(content);
+            fileService.saveSubjectList(docType, content);
             return ResponseEntity.ok("과목 목록이 저장되었습니다.");
         } catch (IOException e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("저장 중 오류 발생");
         }
     }
+
 
 }
