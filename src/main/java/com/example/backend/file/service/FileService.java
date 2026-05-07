@@ -10,6 +10,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
@@ -19,14 +20,18 @@ public class FileService {
 
     private final Path signatureStorageLocation;
     private final Path documentStorageLocation;
-    private final Path subjectFilePath ;
+    private final Path worklogSubjectFilePath;
+    private final Path researchSubjectFilePath;  // 신규 추가
 
     public FileService(@Value("${file.signature-dir}") String signatureDir,
                        @Value("${file.document-dir}") String documentDir,
-                       @Value("${file.subjects-path}") String subjectFilePath) {
+                       @Value("${file.subjects-worklog-path}") String worklogSubjectPath,
+                       @Value("${file.subjects-research-path}") String researchSubjectPath) {
         this.signatureStorageLocation = this.createDirectory(signatureDir);
         this.documentStorageLocation = this.createDirectory(documentDir);
-        this.subjectFilePath = this.createDirectory(subjectFilePath);
+        this.worklogSubjectFilePath = Paths.get(worklogSubjectPath).toAbsolutePath().normalize();
+        this.researchSubjectFilePath = Paths.get(researchSubjectPath).toAbsolutePath().normalize();
+
     }
 
     public Path createDirectory(String dir) {
@@ -66,16 +71,31 @@ public class FileService {
     }
 
 
-    public List<String> readSubjectList() throws IOException {
-        return Files.readAllLines(subjectFilePath, StandardCharsets.UTF_8);
+    public List<String> readSubjectList(String docType) throws IOException {
+        Path targetPath = "research".equals(docType)
+                ? researchSubjectFilePath
+                : worklogSubjectFilePath;
+
+        if (!Files.exists(targetPath)) return Collections.emptyList(); // Java 8 호환
+        return Files.readAllLines(targetPath, StandardCharsets.UTF_8)
+                .stream()
+                .filter(line -> !line.trim().isEmpty()) // Java 8 호환
+                .collect(java.util.stream.Collectors.toList());
     }
 
-    public void saveSubjectList(String content) throws IOException {
-        Files.write(subjectFilePath,
+
+    public void saveSubjectList(String docType, String content) throws IOException {
+        Path targetPath = "research".equals(docType)
+                ? researchSubjectFilePath
+                : worklogSubjectFilePath;
+
+        Files.createDirectories(targetPath.getParent());
+        Files.write(targetPath,
                 content.getBytes(StandardCharsets.UTF_8),
                 StandardOpenOption.CREATE,
                 StandardOpenOption.TRUNCATE_EXISTING);
     }
+
 
     public void deleteFile(String fileName, String fileType) {
         try {
