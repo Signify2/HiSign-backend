@@ -207,12 +207,8 @@ public class MailService {
         }
 
         return requests.stream()
-                .map(request -> formatSignerRecipient(request.getSignerName(), request.getSignerEmail()))
+                .map(request -> escapeForHtml(request.getSignerName()))
                 .collect(Collectors.joining("<br>"));
-    }
-
-    private String formatSignerRecipient(String signerName, String signerEmail) {
-        return escapeForHtml(signerName) + " (" + escapeForHtml(signerEmail) + ")";
     }
 
     private String escapeForHtml(String value) {
