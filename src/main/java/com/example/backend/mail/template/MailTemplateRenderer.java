@@ -38,7 +38,7 @@ public final class MailTemplateRenderer {
         }
 
         return wrapHtml(
-                "HISign 전자 서명 요청",
+                "HiSign 전자 서명 요청",
                 "#0366d6",
                 "<p style='font-size:16px; color:#333;'>안녕하세요, 사랑 · 겸손 · 봉사 정신의 한동대학교 전자 서명 서비스 <b>HISign</b>입니다.</p>"
                         + "<p style='font-size:16px; color:#333;'><b>"
@@ -81,9 +81,9 @@ public final class MailTemplateRenderer {
 
     public static String renderRejectedSignature(RejectedSignatureTemplate template) {
         return wrapHtml(
-                "HISign 서명 반려 안내",
+                "HiSign 서명 반려 안내",
                 "#d9534f",
-                "<p style='font-size:16px; color:#333;'>안녕하세요, <b>HISign</b> 전자 서명 서비스입니다.</p>"
+                "<p style='font-size:16px; color:#333;'>안녕하세요, <b>HISign</b> 전자 서명 서비스입니다.</p></b> <p style='font-size:16px; color:#333;'>문서가 다음과 같은 사유로 반려되었습니다. </p>"
                         + renderInfoTable(
                                 infoRow("문서명", template.getDocumentName()),
                                 infoRow("반려자", template.getRejectorName())
@@ -91,7 +91,7 @@ public final class MailTemplateRenderer {
                         + "<div class='reason-block'>"
                         + "<p style='font-size:16px; font-weight:bold; color:#d9534f; margin:0 0 8px 0;'>반려 사유</p>"
                         + "<p style='font-size:16px; color:#333; margin:0;'>"
-                        + escapeHtml(template.getRejectReason())
+                        + escapeHtmlWithLineBreaks(template.getRejectReason())
                         + "</p>"
                         + "</div>"
         );
@@ -170,6 +170,17 @@ public final class MailTemplateRenderer {
 
     private static String escapeHtmlAttribute(String value) {
         return escapeHtml(value);
+    }
+
+    private static String escapeHtmlWithLineBreaks(String value) {
+        if (!StringUtils.hasText(value)) {
+            return "-";
+        }
+
+        return escapeHtml(value)
+                .replace("\r\n", "<br>")
+                .replace("\n", "<br>")
+                .replace("\r", "<br>");
     }
 
     public static final class SignatureRequestTemplate {

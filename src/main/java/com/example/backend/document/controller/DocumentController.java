@@ -362,23 +362,7 @@ public class DocumentController {
             // ✅ 5. PDF 생성
             byte[] pdfData = pdfService.generateSignedDocument(id, signatures);
 
-            String fileName= "Unknown";
-            if(document.getType() == 1 ) {
-                // 1. 변수를 조건문 밖에서 미리 선언 (초기값 설정)
-                String subjectName = "Unknown";
-                Pattern pattern = Pattern.compile("^_*([^_]+)");
-                Matcher matcher = pattern.matcher(document.getRequestName());
-                // 2. 조건문 안에서 값을 할당
-                if (matcher.find()) {
-                    subjectName = matcher.group(1);
-                }
-                fileName = String.format("%s(%s)_%s.pdf",
-                        document.getMember().getName(),
-                        document.getMember().getUniqueId(),
-                        subjectName);
-            } else {
-                fileName = document.getFileName();
-            }
+            String fileName = resolveDownloadFileName(document);
 
             String encodedFileName = URLEncoder.encode(fileName, "UTF-8")
                     .replaceAll("\\+", "%20");
@@ -407,10 +391,7 @@ public class DocumentController {
                 List<Signature> signatures = signatureService.getSignaturesForDocument(id);
                 byte[] pdfData = pdfService.generateSignedDocument(id, signatures);
 
-                String baseName  = document.getRequestName();
-                if (!baseName .toLowerCase().endsWith(".pdf")) {
-                    baseName  += ".pdf";
-                }
+                String baseName = resolveDownloadFileName(document);
 
                 // 중복 처리
                 String finalName = baseName;
@@ -448,6 +429,22 @@ public class DocumentController {
         } catch (Exception e) {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "ZIP 압축 중 오류 발생", e);
         }
+    }
+
+    private String resolveDownloadFileName(Document document) {
+        if (document.getType() == 1) {
+            String subjectName = "Unknown";
+            Pattern pattern = Pattern.compile("^_*([^_]+)");
+            Matcher matcher = pattern.matcher(document.getRequestName());
+            if (matcher.find()) {
+                subjectName = matcher.group(1);
+            }
+            return String.format("%s(%s)_%s.pdf",
+                    document.getMember().getName(),
+                    document.getMember().getUniqueId(),
+                    subjectName);
+        }
+        return document.getFileName();
     }
 
 }
