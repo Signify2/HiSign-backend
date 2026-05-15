@@ -9,8 +9,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
@@ -41,6 +39,7 @@ import com.example.backend.auth.dto.AuthDto;
 import com.example.backend.document.dto.UploadRequestDTO;
 import com.example.backend.document.entity.Document;
 import com.example.backend.document.service.DocumentService;
+import com.example.backend.document.support.DocumentFileNameResolver;
 import com.example.backend.file.service.FileService;
 import com.example.backend.mail.service.MailService;
 import com.example.backend.member.entity.Member;
@@ -362,7 +361,7 @@ public class DocumentController {
             // ✅ 5. PDF 생성
             byte[] pdfData = pdfService.generateSignedDocument(id, signatures);
 
-            String fileName = resolveDownloadFileName(document);
+            String fileName = DocumentFileNameResolver.resolveDownloadFileName(document);
 
             String encodedFileName = URLEncoder.encode(fileName, "UTF-8")
                     .replaceAll("\\+", "%20");
@@ -391,7 +390,7 @@ public class DocumentController {
                 List<Signature> signatures = signatureService.getSignaturesForDocument(id);
                 byte[] pdfData = pdfService.generateSignedDocument(id, signatures);
 
-                String baseName = resolveDownloadFileName(document);
+                String baseName = DocumentFileNameResolver.resolveDownloadFileName(document);
 
                 // 중복 처리
                 String finalName = baseName;
@@ -429,22 +428,6 @@ public class DocumentController {
         } catch (Exception e) {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "ZIP 압축 중 오류 발생", e);
         }
-    }
-
-    private String resolveDownloadFileName(Document document) {
-        if (document.getType() == 1) {
-            String subjectName = "Unknown";
-            Pattern pattern = Pattern.compile("^_*([^_]+)");
-            Matcher matcher = pattern.matcher(document.getRequestName());
-            if (matcher.find()) {
-                subjectName = matcher.group(1);
-            }
-            return String.format("%s(%s)_%s.pdf",
-                    document.getMember().getName(),
-                    document.getMember().getUniqueId(),
-                    subjectName);
-        }
-        return document.getFileName();
     }
 
 }
