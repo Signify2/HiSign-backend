@@ -4,6 +4,7 @@ import com.example.backend.auth.util.EncryptionUtil;
 import com.example.backend.document.entity.Document;
 import com.example.backend.document.support.DocumentFileNameResolver;
 import com.example.backend.mail.support.MailSenderResolver;
+import com.example.backend.mail.support.MailServiceName;
 import com.example.backend.mail.template.MailTemplateRenderer;
 import com.example.backend.mail.template.MailTemplateRenderer.CompletedSignatureTemplate;
 import com.example.backend.mail.template.MailTemplateRenderer.RejectedSignatureTemplate;
@@ -73,7 +74,7 @@ public class MailService {
         sendEmail(
                 recipientEmail,
                 senderDisplayName,
-                "[HISign] " + requesterName + " 님으로부터 [" + documentName + "] 서명 요청입니다.",
+                MailServiceName.subjectPrefix() + requesterName + " 님으로부터 [" + documentName + "] 서명 요청입니다.",
                 MailTemplateRenderer.renderSignatureRequest(template)
         );
     }
@@ -100,7 +101,7 @@ public class MailService {
             boolean attachmentIncluded = document.getType() != 1;
 
             helper.setTo(recipientEmail);
-            helper.setSubject("[HISign] " + requesterName + " 님의 [" + documentName + "] 모든 서명이 완료되었습니다.");
+            helper.setSubject(MailServiceName.subjectPrefix() + requesterName + " 님의 [" + documentName + "] 모든 서명이 완료되었습니다.");
             setFromWithDisplayName(helper, requesterName);
 
             CompletedSignatureTemplate template = new CompletedSignatureTemplate(
@@ -138,7 +139,7 @@ public class MailService {
             String rejectReason = StringUtils.hasText(reason) ? reason : "사유 없음";
 
             helper.setTo(recipientEmail);
-            helper.setSubject("[HISign] " + senderDisplayName + " 님으로부터 [" + documentName + "] 서명 요청이 반려되었습니다.");
+            helper.setSubject(MailServiceName.subjectPrefix() + senderDisplayName + " 님으로부터 [" + documentName + "] 서명 요청이 반려되었습니다.");
             setFromWithDisplayName(helper, senderDisplayName);
 
             RejectedSignatureTemplate template = new RejectedSignatureTemplate(
@@ -190,7 +191,7 @@ public class MailService {
             return fallbackName.trim();
         }
 
-        return "HISign";
+        return MailServiceName.SERVICE_NAME;
     }
 
     private boolean shouldIncludePassword(String password) {
