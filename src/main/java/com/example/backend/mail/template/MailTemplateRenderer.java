@@ -1,5 +1,7 @@
 package com.example.backend.mail.template;
 
+import static com.example.backend.mail.support.MailServiceName.SERVICE_NAME;
+
 import org.springframework.util.StringUtils;
 
 public final class MailTemplateRenderer {
@@ -38,9 +40,11 @@ public final class MailTemplateRenderer {
         }
 
         return wrapHtml(
-                "HISign 전자 서명 요청",
+                SERVICE_NAME + " 전자 서명 요청",
                 "#0366d6",
-                "<p style='font-size:16px; color:#333;'>안녕하세요, 사랑 · 겸손 · 봉사 정신의 한동대학교 전자 서명 서비스 <b>HISign</b>입니다.</p>"
+                "<p style='font-size:16px; color:#333;'>안녕하세요, 사랑 · 겸손 · 봉사 정신의 한동대학교 전자 서명 서비스 <b>"
+                        + escapeHtml(SERVICE_NAME)
+                        + "</b>입니다.</p>"
                         + "<p style='font-size:16px; color:#333;'><b>"
                         + escapeHtml(template.getSenderName())
                         + "</b>님으로부터 서명 요청이 도착했습니다. 아래 정보를 확인한 뒤 서명을 진행해 주세요.</p>"
@@ -66,9 +70,11 @@ public final class MailTemplateRenderer {
                 : "<p style='font-size:16px; color:#333;'>모든 서명이 완료된 문서가 정상적으로 처리되었습니다.</p>";
 
         return wrapHtml(
-                "HISign 서명 완료 안내",
+                SERVICE_NAME + " 서명 완료 안내",
                 "#0366d6",
-                "<p style='font-size:16px; color:#333;'>안녕하세요, 사랑 · 겸손 · 봉사 정신의 한동대학교 전자 서명 서비스 <b>HISign</b>입니다.</p>"
+                "<p style='font-size:16px; color:#333;'>안녕하세요, 사랑 · 겸손 · 봉사 정신의 한동대학교 전자 서명 서비스 <b>"
+                        + escapeHtml(SERVICE_NAME)
+                        + "</b>입니다.</p>"
                         + renderInfoTable(
                                 infoRow("요청자", template.getRequesterName()),
                                 infoRow("문서명", template.getDocumentName()),
@@ -81,9 +87,12 @@ public final class MailTemplateRenderer {
 
     public static String renderRejectedSignature(RejectedSignatureTemplate template) {
         return wrapHtml(
-                "HISign 서명 반려 안내",
+                SERVICE_NAME + " 서명 반려 안내",
                 "#d9534f",
-                "<p style='font-size:16px; color:#333;'>안녕하세요, <b>HISign</b> 전자 서명 서비스입니다.</p>"
+                "<p style='font-size:16px; color:#333;'>안녕하세요, <b>"
+                        + escapeHtml(SERVICE_NAME)
+                        + "</b> 전자 서명 서비스입니다.</p>"
+                        + "<p style='font-size:16px; color:#333;'>문서가 다음과 같은 사유로 반려되었습니다.</p>"
                         + renderInfoTable(
                                 infoRow("문서명", template.getDocumentName()),
                                 infoRow("반려자", template.getRejectorName())
@@ -91,7 +100,7 @@ public final class MailTemplateRenderer {
                         + "<div class='reason-block'>"
                         + "<p style='font-size:16px; font-weight:bold; color:#d9534f; margin:0 0 8px 0;'>반려 사유</p>"
                         + "<p style='font-size:16px; color:#333; margin:0;'>"
-                        + escapeHtml(template.getRejectReason())
+                        + escapeHtmlWithLineBreaks(template.getRejectReason())
                         + "</p>"
                         + "</div>"
         );
@@ -170,6 +179,17 @@ public final class MailTemplateRenderer {
 
     private static String escapeHtmlAttribute(String value) {
         return escapeHtml(value);
+    }
+
+    private static String escapeHtmlWithLineBreaks(String value) {
+        if (!StringUtils.hasText(value)) {
+            return "-";
+        }
+
+        return escapeHtml(value)
+                .replace("\r\n", "<br>")
+                .replace("\n", "<br>")
+                .replace("\r", "<br>");
     }
 
     public static final class SignatureRequestTemplate {

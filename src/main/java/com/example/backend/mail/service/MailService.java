@@ -2,7 +2,9 @@ package com.example.backend.mail.service;
 
 import com.example.backend.auth.util.EncryptionUtil;
 import com.example.backend.document.entity.Document;
+import com.example.backend.document.support.DocumentFileNameResolver;
 import com.example.backend.mail.support.MailSenderResolver;
+import com.example.backend.mail.support.MailServiceName;
 import com.example.backend.mail.template.MailTemplateRenderer;
 import com.example.backend.mail.template.MailTemplateRenderer.CompletedSignatureTemplate;
 import com.example.backend.mail.template.MailTemplateRenderer.RejectedSignatureTemplate;
@@ -45,7 +47,6 @@ public class MailService {
     private void sendSignatureRequestEmail(
             SignatureRequest request,
             String senderName,
-            String requestName,
             String password,
             String signersText
     ) throws Exception {
@@ -58,9 +59,11 @@ public class MailService {
         String formattedDeadline = request.getExpiredAt().format(EXPIRATION_FORMATTER);
         String accessPassword = shouldIncludePassword(password) ? password : null;
 
+        String documentName = safeText(DocumentFileNameResolver.resolveDownloadFileName(document));
+
         SignatureRequestTemplate template = new SignatureRequestTemplate(
                 requesterName,
-                document.getFileName(),
+                documentName,
                 document.getDescription(),
                 formattedDeadline,
                 signatureUrl,
@@ -71,7 +74,7 @@ public class MailService {
         sendEmail(
                 recipientEmail,
                 senderDisplayName,
-                "[HISign] " + requesterName + " 님으로부터 [" + requestName + "] 서명 요청입니다.",
+                MailServiceName.subjectPrefix() + requesterName + " 님으로부터 [" + documentName + "] 서명 요청입니다.",
                 MailTemplateRenderer.renderSignatureRequest(template)
         );
     }
@@ -79,7 +82,7 @@ public class MailService {
     public void sendSignatureRequestEmails(String senderName, String requestName, List<SignatureRequest> requests, String password) throws Exception {
         String signersText = formatSigners(requests);
         for (SignatureRequest request : requests) {
-            sendSignatureRequestEmail(request, senderName, requestName, password, signersText);
+            sendSignatureRequestEmail(request, senderName, password, signersText);
         }
     }
 
@@ -94,12 +97,11 @@ public class MailService {
             MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
 
             String requesterName = resolveRequesterName(document, null);
-            String requestName = safeText(document.getRequestName());
-            String documentName = safeText(document.getFileName());
+            String documentName = safeText(DocumentFileNameResolver.resolveDownloadFileName(document));
             boolean attachmentIncluded = document.getType() != 1;
 
             helper.setTo(recipientEmail);
-            helper.setSubject("[HISign] " + requesterName + " 님의 [" + requestName + "] 모든 서명이 완료되었습니다.");
+            helper.setSubject(MailServiceName.subjectPrefix() + requesterName + " 님의 [" + documentName + "] 모든 서명이 완료되었습니다.");
             setFromWithDisplayName(helper, requesterName);
 
             CompletedSignatureTemplate template = new CompletedSignatureTemplate(
@@ -110,11 +112,7 @@ public class MailService {
             helper.setText(MailTemplateRenderer.renderCompletedSignature(template), true);
 
             if (attachmentIncluded) {
-                String fileName = document.getFileName();
-                if (!fileName.toLowerCase().endsWith(".pdf")) {
-                    fileName += ".pdf";
-                }
-                helper.addAttachment(fileName, new ByteArrayResource(pdfData));
+                helper.addAttachment(documentName, new ByteArrayResource(pdfData));
             } else {
                 log.info("타입 1 문서: PDF 첨부 생략");
             }
@@ -137,12 +135,11 @@ public class MailService {
             MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
 
             String senderDisplayName = mailSenderResolver.resolveDisplayName(rejectorName);
-            String requestName = safeText(document.getRequestName());
-            String documentName = safeText(document.getFileName());
+            String documentName = safeText(DocumentFileNameResolver.resolveDownloadFileName(document));
             String rejectReason = StringUtils.hasText(reason) ? reason : "사유 없음";
 
             helper.setTo(recipientEmail);
-            helper.setSubject("[HISign] " + senderDisplayName + " 님으로부터 [" + requestName + "] 서명 요청이 반려되었습니다.");
+            helper.setSubject(MailServiceName.subjectPrefix() + senderDisplayName + " 님으로부터 [" + documentName + "] 서명 요청이 반려되었습니다.");
             setFromWithDisplayName(helper, senderDisplayName);
 
             RejectedSignatureTemplate template = new RejectedSignatureTemplate(
@@ -194,7 +191,7 @@ public class MailService {
             return fallbackName.trim();
         }
 
-        return "HISign";
+        return MailServiceName.SERVICE_NAME;
     }
 
     private boolean shouldIncludePassword(String password) {

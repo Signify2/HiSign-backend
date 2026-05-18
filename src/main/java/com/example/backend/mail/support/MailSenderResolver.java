@@ -34,6 +34,6 @@ public class MailSenderResolver {
             return fallbackName.trim();
         }
 
-        return "HISign";
+        return MailServiceName.SERVICE_NAME;
     }
 }

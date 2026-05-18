@@ -9,8 +9,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
@@ -41,6 +39,7 @@ import com.example.backend.auth.dto.AuthDto;
 import com.example.backend.document.dto.UploadRequestDTO;
 import com.example.backend.document.entity.Document;
 import com.example.backend.document.service.DocumentService;
+import com.example.backend.document.support.DocumentFileNameResolver;
 import com.example.backend.file.service.FileService;
 import com.example.backend.mail.service.MailService;
 import com.example.backend.member.entity.Member;
@@ -362,23 +361,7 @@ public class DocumentController {
             // ✅ 5. PDF 생성
             byte[] pdfData = pdfService.generateSignedDocument(id, signatures);
 
-            String fileName= "Unknown";
-            if(document.getType() == 1 ) {
-                // 1. 변수를 조건문 밖에서 미리 선언 (초기값 설정)
-                String subjectName = "Unknown";
-                Pattern pattern = Pattern.compile("^_*([^_]+)");
-                Matcher matcher = pattern.matcher(document.getRequestName());
-                // 2. 조건문 안에서 값을 할당
-                if (matcher.find()) {
-                    subjectName = matcher.group(1);
-                }
-                fileName = String.format("%s(%s)_%s.pdf",
-                        document.getMember().getName(),
-                        document.getMember().getUniqueId(),
-                        subjectName);
-            } else {
-                fileName = document.getFileName();
-            }
+            String fileName = DocumentFileNameResolver.resolveDownloadFileName(document);
 
             String encodedFileName = URLEncoder.encode(fileName, "UTF-8")
                     .replaceAll("\\+", "%20");
@@ -407,10 +390,7 @@ public class DocumentController {
                 List<Signature> signatures = signatureService.getSignaturesForDocument(id);
                 byte[] pdfData = pdfService.generateSignedDocument(id, signatures);
 
-                String baseName  = document.getRequestName();
-                if (!baseName .toLowerCase().endsWith(".pdf")) {
-                    baseName  += ".pdf";
-                }
+                String baseName = DocumentFileNameResolver.resolveDownloadFileName(document);
 
                 // 중복 처리
                 String finalName = baseName;
