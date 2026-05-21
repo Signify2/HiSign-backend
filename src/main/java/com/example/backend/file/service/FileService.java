@@ -71,27 +71,63 @@ public class FileService {
     }
 
 
+    // ── 카테고리 태그 상수 ─────────────────────────────────────────
+    // txt 파일에는 "[근무일지]", "[연구참여확약서]" 접두사가 붙어 있습니다.
+    // 읽을 때는 태그를 제거하고, 저장할 때는 태그를 다시 붙여 파일 형식을 유지합니다.
+    private static final String TAG_WORKLOG  = "[근무일지]";
+    private static final String TAG_RESEARCH = "[연구참여확약서]";
+
+    /**
+     * 과목 목록 파일을 읽어 카테고리 태그가 제거된 순수 과목명 리스트를 반환합니다.
+     * 예) "[근무일지]데이타구조(김동근)" → "데이타구조(김동근)"
+     */
     public List<String> readSubjectList(String docType) throws IOException {
         Path targetPath = "research".equals(docType)
                 ? researchSubjectFilePath
                 : worklogSubjectFilePath;
 
-        if (!Files.exists(targetPath)) return Collections.emptyList(); // Java 8 호환
+        if (!Files.exists(targetPath)) return Collections.emptyList();
+
+        String tag = "research".equals(docType) ? TAG_RESEARCH : TAG_WORKLOG;
+
         return Files.readAllLines(targetPath, StandardCharsets.UTF_8)
                 .stream()
-                .filter(line -> !line.trim().isEmpty()) // Java 8 호환
+                .filter(line -> !line.trim().isEmpty())
+                .map(line -> {
+                    String trimmed = line.trim();
+                    // 태그로 시작하는 줄에서만 태그를 제거
+                    return trimmed.startsWith(tag)
+                            ? trimmed.substring(tag.length())
+                            : trimmed;
+                })
                 .collect(java.util.stream.Collectors.toList());
     }
 
-
+    /**
+     * 과목명 리스트를 파일에 저장합니다.
+     * 프론트에서 태그 없이 전달된 과목명에 카테고리 태그를 다시 붙여 파일 형식을 유지합니다.
+     * 예) "데이타구조(김동근)" → "[근무일지]데이타구조(김동근)"
+     */
     public void saveSubjectList(String docType, String content) throws IOException {
         Path targetPath = "research".equals(docType)
                 ? researchSubjectFilePath
                 : worklogSubjectFilePath;
 
+        String tag = "research".equals(docType) ? TAG_RESEARCH : TAG_WORKLOG;
+
+        // 줄 단위로 분리 → 각 줄에 태그 접두사 추가 → 다시 합치기
+        String tagged = java.util.Arrays.stream(content.split("\n"))
+                .map(String::trim)
+                .filter(line -> !line.isEmpty())
+                .map(line -> {
+                    // 이미 태그가 붙어 있으면 중복 추가 방지
+                    return line.startsWith(tag) ? line : tag + line;
+                })
+                .collect(java.util.stream.Collectors.joining("\n"));
+
         Files.createDirectories(targetPath.getParent());
         Files.write(targetPath,
-                content.getBytes(StandardCharsets.UTF_8),
+                tagged.getBytes(StandardCharsets.UTF_8),
                 StandardOpenOption.CREATE,
                 StandardOpenOption.TRUNCATE_EXISTING);
     }
