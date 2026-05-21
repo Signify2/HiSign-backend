@@ -66,7 +66,7 @@ public interface DocumentRepository extends JpaRepository<Document, Long> {
                     ") " +
                     "ORDER BY d.created_at DESC",
             nativeQuery = true)
-    List<Object[]> findAllDocumentsWhereTypeIsOne(@Param("uniqueId") String uniqueId);
+    List<Object[]> findAllAdminDocuments(@Param("uniqueId") String uniqueId);
 
 
 

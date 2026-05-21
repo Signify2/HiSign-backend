@@ -277,7 +277,7 @@ public class DocumentService {
     }
 
     public List<Map<String, Object>> getAllAdminDocuments(String uniqueId) {
-        List<Object[]> results = documentRepository.findAllDocumentsWhereTypeIsOne(uniqueId);
+        List<Object[]> results = documentRepository.findAllAdminDocuments(uniqueId);
 
         List<Map<String, Object>> documents = new ArrayList<>();
         for (Object[] result : results) {
