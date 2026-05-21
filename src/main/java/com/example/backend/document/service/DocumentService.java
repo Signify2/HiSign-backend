@@ -1,8 +1,6 @@
 package com.example.backend.document.service;
 
-import com.example.backend.auth.exception.DoNotExistException;
 import com.example.backend.auth.util.EncryptionUtil;
-import com.example.backend.document.dto.DocumentDTO;
 import com.example.backend.document.entity.Document;
 import com.example.backend.document.entity.HiddenDocument;
 import com.example.backend.document.entity.enums.DocumentType;
@@ -12,7 +10,6 @@ import com.example.backend.file.service.FileService;
 import com.example.backend.member.entity.Member;
 import com.example.backend.member.repository.MemberRepository;
 import com.example.backend.signatureRequest.repository.SignatureRequestRepository;
-import com.example.backend.signatureRequest.service.SignatureRequestService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.FileSystemResource;

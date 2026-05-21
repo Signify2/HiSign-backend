@@ -14,7 +14,7 @@ public final class DocumentFileNameResolver {
     }
 
     public static String resolveDownloadFileName(Document document) {
-        if (document.getType() == DocumentType.BASIC) {
+        if (document.getType() != DocumentType.BASIC) {
             String subjectName = "Unknown";
             Matcher matcher = SUBJECT_NAME_PATTERN.matcher(document.getRequestName());
             if (matcher.find()) {
