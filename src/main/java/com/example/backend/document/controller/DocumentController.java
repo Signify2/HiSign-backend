@@ -13,6 +13,7 @@ import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
+import com.example.backend.document.entity.enums.DocumentType;
 import org.springframework.core.io.Resource;
 import org.springframework.http.ContentDisposition;
 import org.springframework.http.HttpHeaders;
@@ -102,7 +103,7 @@ public class DocumentController {
             documentService.save(document);
 
             // 4. 타입에 따라 분기
-            if (document.getType() == 1) {
+            if (document.getType() != DocumentType.BASIC) {
                 // 타입 1 → 검토 요청만 (메일 ❌)
                 if(!dto.getIsSelfIncluded()) documentService.requestCheckingById(document.getId());
                 signatureRequestService.saveSignatureRequestAndFields(document, dto.getSigners(), dto.getPassword(), dto.getExpirationDateTime());

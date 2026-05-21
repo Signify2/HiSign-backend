@@ -4,6 +4,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import com.example.backend.document.entity.Document;
+import com.example.backend.document.entity.enums.DocumentType;
 
 public final class DocumentFileNameResolver {
 
@@ -13,7 +14,7 @@ public final class DocumentFileNameResolver {
     }
 
     public static String resolveDownloadFileName(Document document) {
-        if (document.getType() == 1) {
+        if (document.getType() == DocumentType.BASIC) {
             String subjectName = "Unknown";
             Matcher matcher = SUBJECT_NAME_PATTERN.matcher(document.getRequestName());
             if (matcher.find()) {

@@ -2,6 +2,7 @@ package com.example.backend.mail.service;
 
 import com.example.backend.auth.util.EncryptionUtil;
 import com.example.backend.document.entity.Document;
+import com.example.backend.document.entity.enums.DocumentType;
 import com.example.backend.document.support.DocumentFileNameResolver;
 import com.example.backend.mail.support.MailSenderResolver;
 import com.example.backend.mail.support.MailServiceName;
@@ -98,7 +99,7 @@ public class MailService {
 
             String requesterName = resolveRequesterName(document, null);
             String documentName = safeText(DocumentFileNameResolver.resolveDownloadFileName(document));
-            boolean attachmentIncluded = document.getType() != 1;
+            boolean attachmentIncluded = document.getType() == DocumentType.BASIC;
 
             helper.setTo(recipientEmail);
             helper.setSubject(MailServiceName.subjectPrefix() + requesterName + " 님의 [" + documentName + "] 모든 서명이 완료되었습니다.");

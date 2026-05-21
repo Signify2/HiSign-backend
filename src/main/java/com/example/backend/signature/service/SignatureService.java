@@ -1,6 +1,7 @@
 package com.example.backend.signature.service;
 
 import com.example.backend.document.entity.Document;
+import com.example.backend.document.entity.enums.DocumentType;
 import com.example.backend.document.repository.DocumentRepository;
 import com.example.backend.document.service.DocumentService;
 import com.example.backend.file.service.FileService;
@@ -152,7 +153,7 @@ public class SignatureService {
 
         //작업중(8)일 경우, 검토중(0) 혹은 서명 중으로 변경
         if(document.getStatus() == 8){
-            if(document.getType() != 1) document.setStatus(0);
+            if(document.getType() == DocumentType.BASIC) document.setStatus(0);
             else document.setStatus(7);
             documentRepository.save(document);
         }
@@ -166,7 +167,7 @@ public class SignatureService {
 
                 // ✅ 6. 문서와 관련된 모든 사용자(요청자 + 서명자)에게 이메일 발송
                 List<String> recipients = getAllRecipientsForDocument(documentId);
-                if(document.getType() != 1) {
+                if(document.getType() == DocumentType.BASIC) {
                     for (String email : recipients) {
                         mailService.sendCompletedSignatureMail(email, document, pdfData);
                     }
