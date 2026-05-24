@@ -52,7 +52,7 @@ public class MailService {
     ) throws Exception {
         Document document = request.getDocument();
         String requesterName = resolveRequesterName(document, senderName);
-        String senderDisplayName = mailSenderResolver.resolveDisplayName(requesterName);
+        String senderDisplayName = MailServiceName.SERVICE_NAME + " 관리자";
         String recipientEmail = request.getSignerEmail();
         String encryptedToken = encryptionUtil.encryptUUID(request.getToken());
         String signatureUrl = client + "/hisign/checkEmail?token=" + encryptedToken;
@@ -74,7 +74,7 @@ public class MailService {
         sendEmail(
                 recipientEmail,
                 senderDisplayName,
-                MailServiceName.subjectPrefix() + requesterName + " 님으로부터 [" + documentName + "] 서명 요청입니다.",
+                requesterName + "님으로부터 서명 요청이 도착했습니다. [" + documentName + "]",
                 MailTemplateRenderer.renderSignatureRequest(template)
         );
     }
@@ -102,7 +102,7 @@ public class MailService {
 
             helper.setTo(recipientEmail);
             helper.setSubject(MailServiceName.subjectPrefix() + requesterName + " 님의 [" + documentName + "] 모든 서명이 완료되었습니다.");
-            setFromWithDisplayName(helper, requesterName);
+            setFromWithDisplayName(helper, MailServiceName.SERVICE_NAME + " 관리자");
 
             CompletedSignatureTemplate template = new CompletedSignatureTemplate(
                     requesterName,
@@ -140,7 +140,7 @@ public class MailService {
 
             helper.setTo(recipientEmail);
             helper.setSubject(MailServiceName.subjectPrefix() + senderDisplayName + " 님으로부터 [" + documentName + "] 서명 요청이 반려되었습니다.");
-            setFromWithDisplayName(helper, senderDisplayName);
+            setFromWithDisplayName(helper, MailServiceName.SERVICE_NAME + " 관리자");
 
             RejectedSignatureTemplate template = new RejectedSignatureTemplate(
                     documentName,
