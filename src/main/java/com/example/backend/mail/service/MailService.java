@@ -60,6 +60,8 @@ public class MailService {
         String accessPassword = shouldIncludePassword(password) ? password : null;
 
         String documentName = safeText(DocumentFileNameResolver.resolveDownloadFileName(document));
+        String subjectFileName = safeText(DocumentFileNameResolver.resolveSubjectFileName(document)); // 제목용
+        String requesterUniqueId = document.getMember().getUniqueId(); // 학번
 
         SignatureRequestTemplate template = new SignatureRequestTemplate(
                 requesterName,
@@ -74,7 +76,8 @@ public class MailService {
         sendEmail(
                 recipientEmail,
                 senderDisplayName,
-                requesterName + "님으로부터 서명 요청이 도착했습니다. [" + documentName + "]",
+                // requesterName + "님으로부터 서명 요청이 도착했습니다. [" + documentName + "]",
+                requesterName + "(" + requesterUniqueId + ") 님으로부터 " + subjectFileName + " 서명 요청이 도착했습니다.",
                 MailTemplateRenderer.renderSignatureRequest(template)
         );
     }
