@@ -1,5 +1,6 @@
 package com.example.backend.document.entity;
 
+import com.example.backend.document.entity.enums.DocumentType;
 import com.example.backend.member.entity.Member;
 import javax.persistence.*;
 import lombok.Getter;
@@ -51,8 +52,9 @@ public class Document {
     @Column(length = 255)
     private String description;
 
-    @Column(nullable = false, columnDefinition = "TINYINT")
-    private Integer type; // 0: 기본 1: TA 근무일지
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 20)
+    private DocumentType type;
 
     @Column(length = 255, nullable = true)
     private String reviewRejectReason;

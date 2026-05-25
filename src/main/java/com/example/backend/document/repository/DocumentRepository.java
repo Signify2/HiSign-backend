@@ -53,11 +53,11 @@ public interface DocumentRepository extends JpaRepository<Document, Long> {
 
     @Query(value =
             "SELECT DISTINCT d.id, d.file_name, d.created_at, d.status, m.name AS requester_name, " +
-                    "       d.request_name, sr.expired_at, d.is_rejectable , d.updated_at " +
+                    "       d.request_name, sr.expired_at, d.is_rejectable , d.updated_at, d.type " +
                     "FROM document d " +
                     "JOIN member m ON d.unique_id = m.unique_id " +
                     "JOIN signature_request sr ON d.id = sr.document_id " +
-                    "WHERE d.type = 1 " +
+                    "WHERE d.type != 'BASIC' " +
                     "AND NOT EXISTS ( " +
                     "    SELECT 1 FROM hidden_document h " +
                     "    WHERE h.document_id = d.id " +
@@ -66,7 +66,7 @@ public interface DocumentRepository extends JpaRepository<Document, Long> {
                     ") " +
                     "ORDER BY d.created_at DESC",
             nativeQuery = true)
-    List<Object[]> findAllDocumentsWhereTypeIsOne(@Param("uniqueId") String uniqueId);
+    List<Object[]> findAllAdminDocuments(@Param("uniqueId") String uniqueId);
 
 
 

@@ -1,17 +1,15 @@
 package com.example.backend.document.service;
 
-import com.example.backend.auth.exception.DoNotExistException;
 import com.example.backend.auth.util.EncryptionUtil;
-import com.example.backend.document.dto.DocumentDTO;
 import com.example.backend.document.entity.Document;
 import com.example.backend.document.entity.HiddenDocument;
+import com.example.backend.document.entity.enums.DocumentType;
 import com.example.backend.document.repository.DocumentRepository;
 import com.example.backend.document.repository.HiddenDocumentRepository;
 import com.example.backend.file.service.FileService;
 import com.example.backend.member.entity.Member;
 import com.example.backend.member.repository.MemberRepository;
 import com.example.backend.signatureRequest.repository.SignatureRequestRepository;
-import com.example.backend.signatureRequest.service.SignatureRequestService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.FileSystemResource;
@@ -44,7 +42,7 @@ public class DocumentService {
         return documentRepository.findById(documentId);
     }
 
-    public Document saveDocument(String requestName,MultipartFile file, String savedFileName, Member member, Integer IsRejectable, String description, Integer type) {
+    public Document saveDocument(String requestName,MultipartFile file, String savedFileName, Member member, Integer IsRejectable, String description, DocumentType type) {
 
         Optional<Member> existingMember = memberRepository.findByUniqueId(member.getUniqueId());
 
@@ -279,7 +277,7 @@ public class DocumentService {
     }
 
     public List<Map<String, Object>> getAllAdminDocuments(String uniqueId) {
-        List<Object[]> results = documentRepository.findAllDocumentsWhereTypeIsOne(uniqueId);
+        List<Object[]> results = documentRepository.findAllAdminDocuments(uniqueId);
 
         List<Map<String, Object>> documents = new ArrayList<>();
         for (Object[] result : results) {
@@ -293,6 +291,7 @@ public class DocumentService {
             docMap.put("expiredAt", result[6] != null ? result[6] : "미설정");
             docMap.put("isRejectable", result[7] != null ? result[7] : "0");
             docMap.put("updatedAt", result[8]);
+            docMap.put("type", result[9] != null ? result[9].toString() : "WORKLOG");
 
             documents.add(docMap);
         }
