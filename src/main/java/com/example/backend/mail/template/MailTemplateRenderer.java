@@ -47,13 +47,14 @@ public final class MailTemplateRenderer {
                         + "</b>입니다.</p>"
                         + "<p style='font-size:16px; color:#333;'><b>"
                         + escapeHtml(template.getSenderName())
-                        + "</b>님으로부터 서명 요청이 도착했습니다. 아래 정보를 확인한 뒤 서명을 진행해 주세요.</p>"
+                        + "</b>님으로부터 서명 요청이 도착했습니다.</p>"
+                        + "<p style='font-size:16px; color:#333;'>아래 정보를 확인한 뒤 서명을 진행해 주세요.</p>"
                         + renderInfoTable(
                                 infoRow("요청자", template.getSenderName()),
                                 infoRowHtml("서명자", template.getSigners()),
                                 infoRow("문서명", template.getDocumentName()),
                                 infoRow("요청 내용", template.getRequestDescription()),
-                                emphasizedInfoRow("만료 일시", template.getExpiredAt())
+                                emphasizedInfoRow("서명 기한", template.getExpiredAt())
                         )
                         + passwordBlock
                         + "<div style='text-align:center;'>"

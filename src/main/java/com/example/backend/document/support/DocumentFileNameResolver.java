@@ -27,4 +27,16 @@ public final class DocumentFileNameResolver {
         }
         return document.getFileName();
     }
+
+    public static String resolveSubjectFileName(Document document) {
+        if (document.getType() == 1) {
+            String subjectName = "Unknown";
+            Matcher matcher = SUBJECT_NAME_PATTERN.matcher(document.getRequestName());
+            if (matcher.find()) {
+                subjectName = matcher.group(1);
+            }
+            return subjectName + ".pdf";
+        }
+        return document.getFileName();
+    }
 }
