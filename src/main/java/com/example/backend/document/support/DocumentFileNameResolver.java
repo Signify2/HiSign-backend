@@ -29,7 +29,7 @@ public final class DocumentFileNameResolver {
     }
 
     public static String resolveSubjectFileName(Document document) {
-        if (document.getType() == 1) {
+        if (document.getType() != DocumentType.BASIC) {
             String subjectName = "Unknown";
             Matcher matcher = SUBJECT_NAME_PATTERN.matcher(document.getRequestName());
             if (matcher.find()) {
