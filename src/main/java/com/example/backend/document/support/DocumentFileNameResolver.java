@@ -15,10 +15,14 @@ public final class DocumentFileNameResolver {
 
     public static String resolveDownloadFileName(Document document) {
         if (document.getType() == DocumentType.WORKLOG || document.getType() == DocumentType.RESEARCH) {
-            return String.format("%s(%s)_%s.pdf",
+            int year = document.getCreatedAt().getYear();
+            int month = document.getCreatedAt().getMonthValue();
+            return String.format("%s(%s)_%s_%d년_%d월.pdf",
                     document.getMember().getName(),
                     document.getMember().getUniqueId(),
-                    document.getRequestName());  // 전체 requestName 사용
+                    document.getRequestName(),
+                    year,
+                    month);
         }
         return document.getFileName();
     }

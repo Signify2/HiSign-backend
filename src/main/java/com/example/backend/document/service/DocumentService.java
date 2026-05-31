@@ -102,6 +102,8 @@ public class DocumentService {
                 docMap.put("status", status);
                 docMap.put("requestName", result[4] != null ? result[4] : "작업명 없음");
                 docMap.put("expiredAt", expiredAt != null ? expiredAt : "미설정");
+                docMap.put("requesterUniqueId", result[6] != null ? result[6] : "");
+                docMap.put("type", result[7] != null ? result[7].toString() : "");
 
                 log.debug("문서 조회용 doc ID: {}", docId);
                 log.debug("문서 조회용 이메일: {}", email);
@@ -180,6 +182,8 @@ public class DocumentService {
 
                 docMap.put("isRejectable", result[8] != null && ((Number) result[8]).intValue() == 1);
                 docMap.put("signStatus", ((Number) result[9]).intValue());
+                docMap.put("requesterUniqueId", result[10] != null ? result[10] : "");
+                docMap.put("type", result[11] != null ? result[11].toString() : "");
 
                 documents.add(docMap);
             } catch (Exception e) {
@@ -292,6 +296,7 @@ public class DocumentService {
             docMap.put("isRejectable", result[7] != null ? result[7] : "0");
             docMap.put("updatedAt", result[8]);
             docMap.put("type", result[9] != null ? result[9].toString() : "WORKLOG");
+            docMap.put("requesterUniqueId", result[10] != null ? result[10] : "");
 
             documents.add(docMap);
         }
