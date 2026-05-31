@@ -14,28 +14,19 @@ public final class DocumentFileNameResolver {
     }
 
     public static String resolveDownloadFileName(Document document) {
-        if (document.getType() != DocumentType.BASIC) {
-            String subjectName = "Unknown";
-            Matcher matcher = SUBJECT_NAME_PATTERN.matcher(document.getRequestName());
-            if (matcher.find()) {
-                subjectName = matcher.group(1);
-            }
+        if (document.getType() == DocumentType.WORKLOG || document.getType() == DocumentType.RESEARCH) {
             return String.format("%s(%s)_%s.pdf",
                     document.getMember().getName(),
                     document.getMember().getUniqueId(),
-                    subjectName);
+                    document.getRequestName());  // 전체 requestName 사용
         }
         return document.getFileName();
     }
 
+    // resolveSubjectFileName - 제목용
     public static String resolveSubjectFileName(Document document) {
-        if (document.getType() != DocumentType.BASIC) {
-            String subjectName = "Unknown";
-            Matcher matcher = SUBJECT_NAME_PATTERN.matcher(document.getRequestName());
-            if (matcher.find()) {
-                subjectName = matcher.group(1);
-            }
-            return subjectName + ".pdf";
+        if (document.getType() == DocumentType.WORKLOG || document.getType() == DocumentType.RESEARCH) {
+            return document.getRequestName() + ".pdf";  // 전체 requestName 사용
         }
         return document.getFileName();
     }
