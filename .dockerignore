@@ -1,0 +1,15 @@
+.git
+.github
+.gradle
+build
+.idea
+.vscode
+*.iml
+*.ipr
+*.iws
+.DS_Store
+uploads
+subjects
+HELP.md
+**/*.md
+application*.properties
