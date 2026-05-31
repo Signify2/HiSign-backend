@@ -45,4 +45,5 @@ src/main/resources/templates/uploads/
 /src/main/java/com/example/backend/auth/util/AES256SupportChecker.java
 
 uploads/
+.env
 .DS_Store
