@@ -16,7 +16,8 @@ services:
       - uploads_data:/app/uploads
       - ./subjects:/app/subjects:ro
     networks:
-      - hisign-network
+      hisign-network:
+        ipv4_address: 10.10.172.1
 
 volumes:
   uploads_data:
