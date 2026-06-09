@@ -77,8 +77,12 @@ public class MailService {
         sendEmail(
                 recipientEmail,
                 senderDisplayName,
-                // requesterName + "님으로부터 서명 요청이 도착했습니다. [" + documentName + "]",
-                requesterName + "(" + requesterUniqueId + ") 님으로부터 " + subjectFileName + " 서명 요청이 도착했습니다.",
+                // requesterName + "(" + requesterUniqueId + ") 님으로부터 " + subjectFileName + " 서명 요청이 도착했습니다.",
+                requesterName + "(" + requesterUniqueId + ")님으로부터 " +
+                        (document.getType() == DocumentType.WORKLOG ? "TA 근무일지" :
+                                document.getType() == DocumentType.RESEARCH ? "연구참여확약서" :
+                                        document.getRequestName()) +
+                        " 서명 요청이 도착했습니다.",
                 MailTemplateRenderer.renderSignatureRequest(template)
         );
     }
