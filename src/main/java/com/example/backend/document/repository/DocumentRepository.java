@@ -18,7 +18,7 @@ public interface DocumentRepository extends JpaRepository<Document, Long> {
     List<Document> findDocumentsBySignerEmail(@Param("email") String email);
 
     @Query(value =
-            "SELECT DISTINCT d.id, d.file_name, d.created_at, d.status, d.request_name, sr.expired_at " +
+            "SELECT DISTINCT d.id, d.file_name, d.created_at, d.status, d.request_name, sr.expired_at, m.unique_id, d.type " +
                     "FROM document d " +
                     "JOIN member m ON d.unique_id = m.unique_id " + // ← JOIN 추가
                     "LEFT JOIN signature_request sr ON d.id = sr.document_id " +
@@ -36,7 +36,8 @@ public interface DocumentRepository extends JpaRepository<Document, Long> {
     @Query(value =
             "SELECT DISTINCT d.id, d.file_name, d.created_at, d.status AS document_status, " +
                     "       m.name AS requester_name, d.request_name, sr.expired_at, " +
-                    "       sr.token, d.is_rejectable, sr.status AS request_status " +
+                    "       sr.token, d.is_rejectable, sr.status AS request_status, " +
+                    "       m.unique_id AS requester_unique_id, d.type " +
                     "FROM document d " +
                     "JOIN member m ON d.unique_id = m.unique_id " +
                     "JOIN signature_request sr ON d.id = sr.document_id " +
@@ -53,7 +54,7 @@ public interface DocumentRepository extends JpaRepository<Document, Long> {
 
     @Query(value =
             "SELECT DISTINCT d.id, d.file_name, d.created_at, d.status, m.name AS requester_name, " +
-                    "       d.request_name, sr.expired_at, d.is_rejectable , d.updated_at, d.type " +
+                    "       d.request_name, sr.expired_at, d.is_rejectable , d.updated_at, d.type, m.unique_id AS requester_unique_id " +
                     "FROM document d " +
                     "JOIN member m ON d.unique_id = m.unique_id " +
                     "JOIN signature_request sr ON d.id = sr.document_id " +
